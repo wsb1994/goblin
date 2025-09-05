@@ -1,0 +1,23 @@
+[data_models]
+
+[[steps]]
+name = "stepOne"
+function = "hello_world"
+inputs = ["default_input"]
+
+[[steps]]
+name = "stepTwo"
+function = "hello_world"
+inputs = ["stepOne"]
+
+
+
+###### goblin ######
+name = "name"
+command = "the command intended for execution by the platform"
+timeout = 500 # default timeout
+test_command = "command to launch a test. All tests should execute in the intended language, and be run from a script that can return 'true' or 'false' by convention"
+require_test = false # stretch goal to only allow in a new versioned script if the test passes when this boolean is true
+
+
+
