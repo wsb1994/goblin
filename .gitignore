@@ -136,6 +136,8 @@ celerybeat.pid
 
 # Environments
 .env
+.env.local
+.env.production
 .envrc
 .venv
 env/
@@ -143,6 +145,22 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+
+# API Credentials and secrets
+*.key
+*.pem
+credentials.json
+.goblin_credentials
+*_credentials.json
+secrets/
+.secrets/
+
+# Model outputs and training artifacts
+model_outputs/
+training_outputs/
+*.pkl
+*.txt.lightgbm
+*_lgb.txt
 
 # Spyder project settings
 .spyderproject

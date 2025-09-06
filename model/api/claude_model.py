@@ -4,7 +4,7 @@ import time
 from typing import List, Dict, Any, Optional
 import re
 
-from ..base import APIBaseModel, ModelConfig, DataProcessor
+from ..base import APIBaseModel, ModelConfig, DataProcessor, get_credential_manager
 
 # Try to import anthropic, but make it optional
 try:
@@ -26,15 +26,18 @@ class ClaudeHateSpeechModel(APIBaseModel):
             
         super().__init__(config)
         
-        # Configuration
-        self.api_key = config.get('api_key')
+        # Configuration - try credential manager first, then config
+        credential_manager = get_credential_manager()
+        
+        self.api_key = config.get('api_key') or credential_manager.get_credential('claude_api_key')
         self.model = config.get('claude_model', 'claude-3-haiku-20240307')
         self.max_tokens = config.get('max_tokens', 1024)
         self.temperature = config.get('temperature', 0.0)
         self.rate_limit_delay = config.get('rate_limit_delay', 1.0)  # seconds between requests
         
         if not self.api_key:
-            raise ValueError("API key must be provided in config['api_key']")
+            instructions = credential_manager.get_setup_instructions()
+            raise ValueError(f"Claude API key not found. Please set up credentials:\n{instructions}")
         
         # Initialize client
         self.client = anthropic.Anthropic(api_key=self.api_key)
