@@ -1,0 +1,6 @@
+name = "ExamplePlan"
+[[steps]]
+name = "Example"
+function = "Example"
+inputs = ["default_input"]
+timeout = 10000
