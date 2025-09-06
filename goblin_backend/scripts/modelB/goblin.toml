@@ -1,5 +1,4 @@
-[goblin]
-name = "moodelA"
+name = "modelB"
 command = "deno run --allow-read main.ts --input '{input}'"
 timeout = 500 # default timeout
 test_command = "bash test.sh" # convention is to return true or false based on success

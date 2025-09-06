@@ -1,0 +1,5 @@
+name = "dbInsert"
+command = "deno run --allow-read --allow-write --allow-ffi main.ts"
+timeout = 5000
+test_command = ""
+require_test = false

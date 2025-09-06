@@ -191,16 +191,16 @@ class Engine:
                         # If formatting fails, use the original input string
                         input_values.append(input_str)
             
-            Script = None
+            script_instance = None
             if step_name in self.scripts:
-                Script = self.scripts[step_name]
+                script_instance = self.scripts[step_name]
             else:
                 raise ValueError(f"Script {step_name} not found in loaded scripts.")
             
             # Debug print to show the command that will be executed
-            print(f"Executing: {Script.command} {' '.join(input_values)}")
+            print(f"Executing: {script_instance.command} {' '.join(input_values)}")
             
-            result = self.run_script(Script, input_values)
+            result = self.run_script(script_instance, input_values)
             print("console log, result from script: ", result)
             with self.cache_lock:
                 self.results_cache[step_name] = result

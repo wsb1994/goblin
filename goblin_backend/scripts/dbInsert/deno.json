@@ -1,0 +1,8 @@
+{
+  "tasks": {
+    "dev": "deno run --allow-read --allow-write --allow-ffi main.ts"
+  },
+  "imports": {
+    "sqlite3": "https://deno.land/x/sqlite3@0.12.0/mod.ts"
+  }
+}

@@ -1,8 +1,26 @@
+/*
+{id, text, label}
+label is 1.0 for hate speech, claude should never know this, but this is your input.
+
+
+output is {
+success: boolean,
+is_hate_speech: boolean,
+model: "ModelB",
+output: {id, text, label} // echo input
+error?: string // if success is false
+}
+*/
+
+
 function standardOutput(output: string) {
   console.log(output);
 }
 
 interface InputData {
+  id?: string;
+  text?: string;
+  label?: number;
   comment?: string;
   [key: string]: any;
 }
@@ -10,9 +28,12 @@ interface InputData {
 interface OutputResponse {
   success: boolean;
   is_hate_speech?: boolean;
+  model: string;
   output?: any;
   error?: string;
 }
+
+const MODEL_NAME = "claude-3-haiku-20240307";
 
 async function checkHateSpeech(comment: string): Promise<boolean> {
   const apiKey = Deno.env.get("ANTHROPIC_API_KEY");
@@ -29,7 +50,7 @@ async function checkHateSpeech(comment: string): Promise<boolean> {
         "content-type": "application/json"
       },
       body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
+        model: MODEL_NAME,
         max_tokens: 100,
         messages: [
           {
@@ -59,24 +80,30 @@ export async function processJson(jsonInput: string): Promise<OutputResponse> {
   try {
     const data: InputData = JSON.parse(jsonInput);
     
-    if (!data.comment) {
+    // Handle both old format (comment) and new format (text)
+    const textToAnalyze = data.text || data.comment;
+    
+    if (!textToAnalyze) {
       return {
         success: false,
-        error: "Missing 'comment' field in input data",
+        model: MODEL_NAME,
+        error: "Missing 'text' or 'comment' field in input data",
         output: data
       };
     }
 
-    const isHateSpeech = await checkHateSpeech(data.comment);
+    const isHateSpeech = await checkHateSpeech(textToAnalyze);
     
     return {
       success: true,
+      model: MODEL_NAME,
       is_hate_speech: isHateSpeech,
       output: data
     };
   } catch (error: unknown) {
     return {
       success: false,
+      model: MODEL_NAME,
       error: error instanceof Error ? error.message : String(error)
     };
   }
