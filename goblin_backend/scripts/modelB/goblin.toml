@@ -1,0 +1,6 @@
+[goblin]
+name = "modelB"
+command = "deno run --allow-read main.ts --input '{input}'"
+timeout = 500 # default timeout
+test_command = "bash test.sh" # convention is to return true or false based on success
+require_test = false # stretch goal to only allow in a new versioned script if the test passes when this boolean is true
