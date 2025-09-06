@@ -1,0 +1,17 @@
+[[steps]]
+name = "ModelA"
+function = "ModelA"
+inputs = ["default_input"]
+timeout = 10000
+
+[[steps]]
+name = "ModelB"
+function = "ModelB"
+inputs = ["default_input"]
+timeout = 10000
+
+[[steps]]
+name = "dbInsert"
+function = "dbInsert"
+inputs = ["ModelA", "ModelB"]
+timeout = 5000

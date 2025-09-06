@@ -10,7 +10,10 @@ name = "stepTwo"
 function = "hello_world"
 inputs = ["stepOne"]
 
-
+[[steps]]
+name = "stepThree"
+function = "echo"
+inputs = ["hello_world"]
 
 ###### goblin ######
 name = "name"
