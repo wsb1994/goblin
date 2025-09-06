@@ -1,24 +1,26 @@
-import unittest
-import toml
-from goblin_backend.engine.engine import load_plan  # Assuming you have a function to load plans
 
-class TestEnginePlanLoad(unittest.TestCase):
-    def setUp(self):
-        # Example TOML string for a plan
-        self.example_toml = """
-        [plan]
-        name = "TestPlan"
-        steps = ["step1", "step2"]
-        """
+import pytest
+from engine.engine import Engine, ExecutionStep
 
-    def test_plan_loads_correctly(self):
-        # Parse TOML string
-        plan_data = toml.loads(self.example_toml)
-        # Load plan using engine logic
-        plan = load_plan(plan_data)
-        # Assertions (customize as per your plan structure)
-        self.assertEqual(plan.name, "TestPlan")
-        self.assertEqual(plan.steps, ["step1", "step2"])
+def test_plan_loads_correctly():
+    # Example TOML string for a plan matching Engine's expected format
+    example_toml = """
+    [[steps]]
+    name = "step1"
+    function = "func1"
+    inputs = ["default_input"]
 
-if __name__ == "__main__":
-    unittest.main()
+    [[steps]]
+    name = "step2"
+    function = "func2"
+    inputs = ["step1"]
+    """
+    engine = Engine()
+    plan = engine.load_plan(example_toml)
+    assert len(plan) == 2
+    assert plan[0].name == "step1"
+    assert plan[0].function == "func1"
+    assert plan[0].inputs == ["default_input"]
+    assert plan[1].name == "step2"
+    assert plan[1].function == "func2"
+    assert plan[1].inputs == ["step1"]

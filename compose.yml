@@ -1,0 +1,17 @@
+  rabbitmq:
+    image: rabbitmq:3.12-management
+    container_name: rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=admin
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:15672"] # Check management plugin
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+    volumes:
+      - ./rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf

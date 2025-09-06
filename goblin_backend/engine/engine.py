@@ -1,4 +1,4 @@
-import tomli
+import toml
 from typing import Dict, List, Any
 import subprocess
 import time
@@ -28,14 +28,14 @@ class Engine:
         
     def load_scripts(self, script_config: str) -> None:
         """Load script configurations from TOML string"""
-        config = tomli.loads(script_config)
+        config = toml.loads(script_config)
         with self.scripts_lock:
             for script_name, script_data in config.items():
                 self.scripts[script_name] = GoblinScript(**script_data)
 
     def load_plan(self, plan_config: str) -> List[ExecutionStep]:
         """Parse execution plan from TOML string"""
-        config = tomli.loads(plan_config)
+        config = toml.loads(plan_config)
         steps = []
         for step in config.get("steps", []):
             steps.append(ExecutionStep(**step))
