@@ -1,0 +1,20 @@
+# Hate Speech Detection A/B Testing Plan
+# Compare different model approaches on the same dataset
+
+[[steps]]
+name = "BasicModel"
+function = "basic_tfidf_logistic"
+inputs = ["default_input"]
+timeout = 30000
+
+[[steps]]
+name = "AdvancedModel"
+function = "hf_embeddings_logistic"
+inputs = ["default_input"]
+timeout = 60000
+
+[[steps]]
+name = "ResultsComparison"
+function = "compare_models"
+inputs = ["BasicModel", "AdvancedModel"]
+timeout = 10000

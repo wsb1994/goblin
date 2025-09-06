@@ -1,0 +1,32 @@
+# Multi-Model Comparison Plan
+# Test multiple hate speech detection approaches
+
+[[steps]]
+name = "TFIDFLogistic"
+function = "basic_tfidf_logistic"
+inputs = ["default_input"]
+timeout = 30000
+
+[[steps]]
+name = "BagOfWordsSVM"
+function = "basic_bow_svm"
+inputs = ["default_input"]
+timeout = 30000
+
+[[steps]]
+name = "RandomForest"
+function = "basic_tfidf_rf"
+inputs = ["default_input"]
+timeout = 30000
+
+[[steps]]
+name = "HuggingFaceLogistic"
+function = "hf_embeddings_logistic"
+inputs = ["default_input"]
+timeout = 60000
+
+[[steps]]
+name = "CompareResults"
+function = "compare_all_models"
+inputs = ["TFIDFLogistic", "BagOfWordsSVM", "RandomForest", "HuggingFaceLogistic"]
+timeout = 10000
