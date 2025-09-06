@@ -113,8 +113,10 @@ class Engine:
             if script.path:
                 os.chdir(script.path)
             
-            # Run the process with inputs
-            command = f"{script.command} {' '.join(str(i) for i in inputs)}"
+            # Run the process with inputs (properly escape JSON strings)
+            import shlex
+            escaped_inputs = [shlex.quote(str(i)) for i in inputs]
+            command = f"{script.command} {' '.join(escaped_inputs)}"
             process = subprocess.Popen(
                 command,
                 shell=True,
@@ -177,19 +179,29 @@ class Engine:
                 input_values = []
                 for input_str in inputs:
                     try:
-                        # Try to format the input string with the cache values
-                        formatted_input = input_str.format(**self.results_cache)
-                        input_values.append(formatted_input)
+                        # Check if input_str is a reference to a cached result
+                        if input_str in self.results_cache:
+                            # Use the cached result directly
+                            input_values.append(str(self.results_cache[input_str]))
+                        else:
+                            # Try to format the input string with the cache values
+                            formatted_input = input_str.format(**self.results_cache)
+                            input_values.append(formatted_input)
                     except KeyError:
                         # If formatting fails, use the original input string
                         input_values.append(input_str)
+            
             Script = None
             if step_name in self.scripts:
                 Script = self.scripts[step_name]
             else:
                 raise ValueError(f"Script {step_name} not found in loaded scripts.")
+            
+            # Debug print to show the command that will be executed
+            print(f"Executing: {Script.command} {' '.join(input_values)}")
+            
             result = self.run_script(Script, input_values)
-
+            print("console log, result from script: ", result)
             with self.cache_lock:
                 self.results_cache[step_name] = result
 

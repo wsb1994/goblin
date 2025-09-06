@@ -13,14 +13,11 @@ def test_engine_example_plan(tmp_path):
         plan = engine.load_plan("/home/wsb/Documents/Binaries/goblin/goblin_backend/plans/example.toml")
         print("===plan===")
         print(plan)
-        #result = engine.execute_plan(plan)
-        # The output should be the JSON string from the script
-      
 
         print('~-~-~-~_~-~-~')
         myresult = engine.scripts.get("Example")
         print(myresult)
         
-        engine.execute_plan(plan)
+        engine.execute_plan(plan, '{"Hello":"world"}')
     finally:
         os.chdir(old_cwd)
