@@ -9,6 +9,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
 
 from model.base import ModelConfig
 from model.basic import BagOfWordsModel
+from model.sophisticated import HuggingFaceLightGBMModel
 from model.training import ModelTrainer, ModelEvaluator
 
 
@@ -16,30 +17,28 @@ def create_model_configs():
     """Create different model configurations for comparison"""
     configs = [
         ModelConfig(
-            model_name="bow_basic",
+            model_name="bow_optimized",
             model_type="basic",
             config={
                 'max_features': 5000,
-                'ngram_range': [1, 1],
-                'C': 1.0
-            }
-        ),
-        ModelConfig(
-            model_name="bow_bigrams", 
-            model_type="basic",
-            config={
-                'max_features': 10000,
                 'ngram_range': [1, 2],
-                'C': 1.0
+                'C': 0.5,
+                'min_df': 2  # Better for larger datasets
             }
         ),
         ModelConfig(
-            model_name="bow_tuned",
-            model_type="basic", 
+            model_name="hf_lightgbm",
+            model_type="sophisticated",
             config={
-                'max_features': 15000,
-                'ngram_range': [1, 3],
-                'C': 0.5
+                'hf_model': 'sentence-transformers/all-MiniLM-L6-v2',
+                'max_length': 128,
+                'batch_size': 32,
+                'num_leaves': 31,
+                'learning_rate': 0.1,
+                'feature_fraction': 0.9,
+                'bagging_fraction': 0.8,
+                'bagging_freq': 5,
+                'random_state': 42
             }
         )
     ]
@@ -53,7 +52,14 @@ def main():
     
     # Create model configurations
     configs = create_model_configs()
-    models = [BagOfWordsModel(config) for config in configs]
+    models = []
+    for config in configs:
+        if config.model_type == "basic":
+            models.append(BagOfWordsModel(config))
+        elif config.model_type == "sophisticated":
+            models.append(HuggingFaceLightGBMModel(config))
+        else:
+            raise ValueError(f"Unknown model type: {config.model_type}")
     
     print(f"Created {len(models)} model configurations:")
     for model in models:
@@ -68,7 +74,7 @@ def main():
         print("Training models on Berkeley dataset...")
         results = trainer.load_berkeley_and_train(
             models=models,
-            sample_size=5000,  # Use subset for faster training
+            sample_size=20000,  # Increased from 5000 to 20000
             validation_split=0.2,
             verbose=True
         )
@@ -84,19 +90,18 @@ def main():
         from model.base import DataProcessor
         print("Loading test data...")
         
-        # For demo, we'll use the English_test.csv if available, otherwise use Berkeley data
+        # Use English_test.csv if available, otherwise use Berkeley data
         try:
-            test_data = DataProcessor.load_evaluation_data("English_test.csv")
-            test_texts = test_data['texts'][:1000]  # Use subset
+            print("Loading English test dataset...")
+            test_data = DataProcessor.load_dataset_with_config("English_test.csv", "english_test")
             
-            # If no labels in test data, create dummy labels for demo
-            if test_data['labels']:
+            if test_data['labels'] is not None:
+                test_texts = test_data['texts'][:1000]  # Use subset
                 test_labels = test_data['labels'][:1000]
+                print(f"Using English test data: {len(test_texts)} samples")
+                print(f"Detected columns - Text: '{test_data['text_column']}', Label: '{test_data['label_column']}'")
             else:
-                print("No labels in test data, using Berkeley data for evaluation...")
-                berkeley_data = DataProcessor.load_berkeley_dataset()
-                test_texts = berkeley_data['texts'][5000:6000]  # Different subset
-                test_labels = berkeley_data['labels'][5000:6000]
+                raise ValueError("No labels found in English test data")
                 
         except Exception as e:
             print(f"Could not load test data: {e}")

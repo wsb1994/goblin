@@ -1,7 +1,7 @@
 import numpy as np
 import pickle
 from typing import List, Dict, Any
-from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
 from sklearn.pipeline import Pipeline
@@ -10,7 +10,7 @@ from ..base import BaseModel, ModelConfig, DataProcessor
 
 
 class BagOfWordsModel(BaseModel):
-    """Bag of Words with Logistic Regression for hate speech detection"""
+    """Bag of Words (Count Vectorizer) with Logistic Regression for hate speech detection"""
     
     def __init__(self, config: ModelConfig):
         super().__init__(config)
@@ -25,14 +25,15 @@ class BagOfWordsModel(BaseModel):
         
         # Initialize pipeline
         self.pipeline = Pipeline([
-            ('vectorizer', TfidfVectorizer(
+            ('vectorizer', CountVectorizer(
                 max_features=self.max_features,
                 ngram_range=self.ngram_range,
-                min_df=self.min_df,
-                max_df=self.max_df,
+                min_df=1,  # More lenient for small datasets
+                max_df=0.95,
                 stop_words='english',
                 lowercase=True,
-                strip_accents='ascii'
+                strip_accents='ascii',
+                binary=True  # Use binary counts (0/1) instead of frequencies
             )),
             ('classifier', LogisticRegression(
                 C=self.C,

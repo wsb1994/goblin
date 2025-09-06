@@ -5,6 +5,18 @@ from sklearn.model_selection import train_test_split
 import datasets
 import re
 
+# Dataset configuration mappings
+DATASET_CONFIGS = {
+    'berkeley': {
+        'text_column': 'text',
+        'label_column': 'hatespeech'
+    },
+    'english_test': {
+        'text_column': 'text',
+        'label_column': 'label'
+    }
+}
+
 
 class DataProcessor:
     """Utilities for data loading, preprocessing, and standardization"""
@@ -39,12 +51,14 @@ class DataProcessor:
             raise RuntimeError(f"Failed to load Berkeley dataset: {e}")
     
     @staticmethod
-    def load_evaluation_data(filepath: str) -> Dict[str, Any]:
+    def load_evaluation_data(filepath: str, text_column: str = None, label_column: str = None) -> Dict[str, Any]:
         """
-        Load evaluation dataset from CSV file
+        Load evaluation dataset from CSV file with flexible column mapping
         
         Args:
             filepath: Path to CSV file
+            text_column: Name of text column (auto-detected if None)
+            label_column: Name of label column (auto-detected if None)
             
         Returns:
             Dataset dictionary with standardized format
@@ -52,23 +66,58 @@ class DataProcessor:
         try:
             data = pd.read_csv(filepath)
             
-            # Assume CSV has 'text' and 'hatespeech' columns like Berkeley dataset
-            if 'text' not in data.columns:
-                raise ValueError("CSV must contain 'text' column")
+            # Auto-detect text column if not specified
+            if text_column is None:
+                text_candidates = ['text', 'comment', 'content', 'message']
+                text_column = next((col for col in text_candidates if col in data.columns), None)
+                if text_column is None:
+                    raise ValueError(f"Could not find text column. Available columns: {list(data.columns)}")
+            
+            if text_column not in data.columns:
+                raise ValueError(f"Text column '{text_column}' not found in CSV. Available columns: {list(data.columns)}")
+            
+            # Auto-detect label column if not specified
+            if label_column is None:
+                label_candidates = ['label', 'hatespeech', 'hate_speech', 'target', 'class']
+                label_column = next((col for col in label_candidates if col in data.columns), None)
             
             # Handle case where labels might not exist (inference only)
-            if 'hatespeech' in data.columns:
-                labels = DataProcessor.binarize_labels(data['hatespeech'].tolist())
+            if label_column and label_column in data.columns:
+                labels = DataProcessor.binarize_labels(data[label_column].tolist())
             else:
                 labels = None
                 
             return {
-                'texts': data['text'].tolist(),
+                'texts': data[text_column].tolist(),
                 'labels': labels,
-                'raw_data': data
+                'raw_data': data,
+                'text_column': text_column,
+                'label_column': label_column
             }
         except Exception as e:
             raise RuntimeError(f"Failed to load evaluation data from {filepath}: {e}")
+    
+    @staticmethod
+    def load_dataset_with_config(filepath: str, dataset_type: str) -> Dict[str, Any]:
+        """
+        Load dataset using predefined configuration
+        
+        Args:
+            filepath: Path to CSV file  
+            dataset_type: Dataset type ('berkeley', 'english_test', etc.)
+            
+        Returns:
+            Dataset dictionary with standardized format
+        """
+        if dataset_type not in DATASET_CONFIGS:
+            raise ValueError(f"Unknown dataset type '{dataset_type}'. Available: {list(DATASET_CONFIGS.keys())}")
+        
+        config = DATASET_CONFIGS[dataset_type]
+        return DataProcessor.load_evaluation_data(
+            filepath, 
+            text_column=config['text_column'], 
+            label_column=config['label_column']
+        )
     
     @staticmethod
     def binarize_labels(labels: List[Any]) -> List[int]:
