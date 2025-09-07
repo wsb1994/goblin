@@ -1,17 +1,19 @@
+name = "AB"
+
 [[steps]]
-name = "ModelA"
-function = "ModelA"
+name = "modelA"
+function = "modelA"
 inputs = ["default_input"]
 timeout = 10000
 
 [[steps]]
-name = "ModelB"
-function = "ModelB"
+name = "modelB"
+function = "modelB"
 inputs = ["default_input"]
 timeout = 10000
 
 [[steps]]
-name = "dbInsert"
-function = "dbInsert"
-inputs = ["ModelA", "ModelB"]
-timeout = 5000
+name = "pythonDbInsert"
+function = "pythonDbInsert"
+inputs = ["modelA", "modelB"]
+timeout = 10000

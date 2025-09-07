@@ -1,4 +1,3 @@
-[goblin]
 name = "Example"
 command = "deno run --allow-read main.ts"
 timeout = 500 # default timeout
