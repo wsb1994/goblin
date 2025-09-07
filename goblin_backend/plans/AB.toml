@@ -7,7 +7,7 @@ inputs = ["default_input"]
 timeout = 10000
 
 [[steps]]
-name = "modelA"
+name = "modelB"
 function = "modelB"
 inputs = ["default_input"]
 timeout = 10000
