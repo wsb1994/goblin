@@ -32,7 +32,7 @@ interface OutputResponse {
   error?: string;
 }
 
-const MODEL_NAME = "claude-3-5-sonnet-20241022";
+const MODEL_NAME = "claude-sonnet-4-20250514";
 
 async function checkHateSpeech(comment: string): Promise<boolean> {
   const apiKey = Deno.env.get("ANTHROPIC_API_KEY");
