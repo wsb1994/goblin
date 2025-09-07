@@ -39,6 +39,12 @@ def test_engine_example_hate_speech_plan(tmp_path):
         # print('~-~-~-~_~-~-~')
         # myresult = engine.scripts.get("Example")
         # print(myresult)
-        engine.execute_plan(plan,   '{"id": "sample_001", "timestamp": "2025-01-06T17:11:00Z", "comment": "I really enjoyed the community event last weekend. It was great to see people from different backgrounds coming together to help clean up the local park. The organizers did an excellent job coordinating everything."}')        
+        engine.execute_plan(plan,'{"id": "sample_001", "timestamp": "2025-01-06T17:11:00Z", "comment": "I really enjoyed the community event last weekend. It was great to see people from different backgrounds coming together to help clean up the local park. The organizers did an excellent job coordinating everything."}')        
     finally:
         os.chdir(old_cwd)
+
+
+if __name__ == "__main__":
+    import tempfile
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        test_engine_example_hate_speech_plan(tmp_dir)

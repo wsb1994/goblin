@@ -1,27 +1,17 @@
 import { Database } from "@db/sqlite";
 
-// Input format: {id, text, label} or {id, comment, label}
+// Input format based on the provided example
+interface ModelOutput {
+  id: string;
+  timestamp: string;
+  comment: string;
+}
+
 interface InputData {
-  id?: string;
-  text?: string;
-  comment?: string;
-  label?: number;
-  [key: string]: any;
-}
-
-// Output format for each model
-interface ModelResult {
   success: boolean;
-  is_hate_speech?: boolean;
-  model?: string;
-  output?: InputData;
-  error?: string;
-}
-
-// Expected input structure
-interface DbInsertInput {
-  ModelA: ModelResult;
-  ModelB: ModelResult;
+  model: string;
+  is_hate_speech: boolean;
+  output: ModelOutput;
 }
 
 // Response format
@@ -45,12 +35,29 @@ function initializeDatabase(db: Database) {
       text TEXT,
       label REAL,
       model TEXT,
-      model_is_hate_speech BOOLEAN
+      model_is_hate_speech BOOLEAN,
+      input_timestamp TEXT
     )
   `);
 }
 
-function insertResults(db: Database, model: ModelResult): number {
+function sanitizeJson(jsonString: string): string {
+  try {
+    // Remove any leading/trailing whitespace
+    let sanitized = jsonString.trim();
+    
+    // Remove any potential BOM characters
+    sanitized = sanitized.replace(/^\uFEFF/, '');
+    
+    // Try to parse and re-stringify to ensure valid JSON
+    const parsed = JSON.parse(sanitized);
+    return JSON.stringify(parsed);
+  } catch (error) {
+    throw new Error(`Invalid JSON format: ${error instanceof Error ? error.message : String(error)}`);
+  }
+}
+
+function insertResult(db: Database, data: InputData): number {
   let insertedCount = 0;
   
   // Prepare insert statement
@@ -60,21 +67,21 @@ function insertResults(db: Database, model: ModelResult): number {
       text,
       label,
       model,
-      model_is_hate_speech
-    ) VALUES (?, ?, ?, ?, ?)
+      model_is_hate_speech,
+      input_timestamp
+    ) VALUES (?, ?, ?, ?, ?, ?)
   `);
   
   try {
-
-    // Insert ModelB result only if success is true
-    if (model.output) {
-      const data = model.output;
+    // Insert result only if success is true
+    if (data.success && data.output) {
       stmt.run(
-        data.id || null,
-        data.text || data.comment || null,
-        data.label || null,
-        modelB.model || "ModelB",
-        modelB.is_hate_speech ? 1 : 0
+        data.output.id || null,
+        data.output.comment || null,
+        null, // No label in the provided format
+        data.model || "unknown",
+        data.is_hate_speech ? 1 : 0,
+        data.output.timestamp || null
       );
       insertedCount++;
     }
@@ -85,18 +92,8 @@ function insertResults(db: Database, model: ModelResult): number {
   return insertedCount;
 }
 
-export async function processJson(jsonInput: string): Promise<OutputResponse> {
+export async function processJsonArray(jsonInputs: string[]): Promise<OutputResponse> {
   try {
-    const data: DbInsertInput = JSON.parse(jsonInput);
-    
-    // Validate input structure
-    if (!data.ModelA || !data.ModelB) {
-      return {
-        success: false,
-        error: "Missing ModelA or ModelB results in input data"
-      };
-    }
-
     // Initialize database connection to current directory
     const db = new Database("./hate_speech_results.db");
     
@@ -104,13 +101,45 @@ export async function processJson(jsonInput: string): Promise<OutputResponse> {
       // Initialize database schema (auto-migration)
       initializeDatabase(db);
       
-      // Insert the results (only successful ones)
-      let insertedCount = insertResults(db, data.ModelA);
-      insertedCount += insertResults(db, data.ModelB);
+      let totalInserted = 0;
+      
+      // Process each JSON input serially
+      for (const jsonInput of jsonInputs) {
+        try {
+          // Sanitize the JSON
+          const sanitizedJson = sanitizeJson(jsonInput);
+          const data: InputData = JSON.parse(sanitizedJson);
+          
+          // Validate input structure
+          if (typeof data.success !== 'boolean') {
+            throw new Error("Missing or invalid 'success' field");
+          }
+          
+          if (!data.model) {
+            throw new Error("Missing 'model' field");
+          }
+          
+          if (typeof data.is_hate_speech !== 'boolean') {
+            throw new Error("Missing or invalid 'is_hate_speech' field");
+          }
+          
+          if (!data.output || !data.output.id || !data.output.comment) {
+            throw new Error("Missing or invalid 'output' field with required 'id' and 'comment'");
+          }
+          
+          // Insert the result
+          const inserted = insertResult(db, data);
+          totalInserted += inserted;
+          
+        } catch (error) {
+          // Log individual JSON processing errors but continue with others
+          standardOutput(`Error processing JSON: ${error instanceof Error ? error.message : String(error)}`);
+        }
+      }
       
       return {
         success: true,
-        inserted_records: insertedCount
+        inserted_records: totalInserted
       };
     } finally {
       db.close();
@@ -126,17 +155,20 @@ export async function processJson(jsonInput: string): Promise<OutputResponse> {
 export async function main() {
   const args = Deno.args;
   
+  // Print all command line arguments as an array to stdout
+  standardOutput(`Command line arguments: ${JSON.stringify(args)}`);
+  
   if (args.length === 0) {
     standardOutput(JSON.stringify({
       success: false,
-      error: 'Please provide JSON input as argument',
+      error: 'Please provide JSON input as arguments',
       inserted_records: 0
     }));
     Deno.exit(1);
   }
 
   try {
-    const result = await processJson(args[0]);
+    const result = await processJsonArray(args);
     standardOutput(JSON.stringify(result));
     
     if (result.success) {

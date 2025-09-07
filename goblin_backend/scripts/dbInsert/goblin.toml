@@ -1,5 +1,5 @@
 name = "dbInsert"
 command = "deno run --allow-all main.ts"
-timeout = 5000
+timeout = 10000
 test_command = ""
 require_test = false
