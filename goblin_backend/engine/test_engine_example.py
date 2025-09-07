@@ -1,6 +1,6 @@
 import json
-from engine.engine import Engine
-from engine.script import Plan
+from goblin_backend.engine.engine import Engine
+from goblin_backend.engine.script import Plan
 
 
 # def test_engine_example_plan(tmp_path):
