@@ -1,9 +1,7 @@
 {
   "version": "5",
   "specifiers": {
-    "jsr:@cd/sqlite@*": "0.12.0",
-    "jsr:@db/sqlite@*": "0.12.0",
-    "jsr:@db/sqlite@0.12": "0.12.0",
+    "jsr:@db/sqlite@0.11": "0.11.1",
     "jsr:@denosaurs/plug@1": "1.1.0",
     "jsr:@dldc/sqlite@*": "3.1.1",
     "jsr:@std/assert@0.217": "0.217.0",
@@ -17,15 +15,8 @@
     "jsr:@std/path@^1.1.1": "1.1.2"
   },
   "jsr": {
-    "@cd/sqlite@0.12.0": {
-      "integrity": "515d94d46c3eb9bd6c771ac3bfad503cde12f5b53624e3815303a233094ed133",
-      "dependencies": [
-        "jsr:@denosaurs/plug",
-        "jsr:@std/path@0.217"
-      ]
-    },
-    "@db/sqlite@0.12.0": {
-      "integrity": "dd1ef7f621ad50fc1e073a1c3609c4470bd51edc0994139c5bf9851de7a6d85f",
+    "@db/sqlite@0.11.1": {
+      "integrity": "546434e7ed762db07e6ade0f963540dd5e06723b802937bf260ff855b21ef9c5",
       "dependencies": [
         "jsr:@denosaurs/plug",
         "jsr:@std/path@0.217"
@@ -88,7 +79,7 @@
   },
   "workspace": {
     "dependencies": [
-      "jsr:@db/sqlite@0.12"
+      "jsr:@db/sqlite@0.11"
     ]
   }
 }

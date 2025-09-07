@@ -69,12 +69,10 @@ function insertResult(db: Database, data: InputData): number {
       label,
       model,
       model_is_hate_speech,
-      input_timestamp
     ) VALUES (?, ?, ?, ?, ?, ?)
   `);
   
   try {
-    // Insert result only if success is true
     if (data.output) {
       // Convert label to number if it's a string
       let labelValue = null;
@@ -83,12 +81,11 @@ function insertResult(db: Database, data: InputData): number {
       }
       
       stmt.run(
-        data.output.id || null,
-        data.output.comment || null,
+        data.output.id,
+        data.output.comment,
         labelValue,
         data.model || "unknown",
         data.is_hate_speech ? 1 : 0,
-        data.output.timestamp || Date().toString()
       );
       insertedCount++;
     }
@@ -101,6 +98,8 @@ function insertResult(db: Database, data: InputData): number {
 
 export async function processJsonArray(jsonInputs: string[]): Promise<OutputResponse> {
   try {
+
+    
     // Initialize database connection to current directory
     const db = new Database("./hate_speech_results.db");
     

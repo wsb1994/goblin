@@ -96,7 +96,11 @@ export async function processJson(jsonInput: string): Promise<OutputResponse> {
       success: true,
       model: MODEL_NAME,
       is_hate_speech: isHateSpeech,
-      output: data
+      output: {
+        id: data.id,
+        comment: textToAnalyze,
+        label: data.label
+      }
     };
   } catch (error: unknown) {
     return {

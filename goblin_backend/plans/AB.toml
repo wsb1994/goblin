@@ -13,7 +13,7 @@ inputs = ["default_input"]
 timeout = 10000
 
 [[steps]]
-name = "dbInsert"
-function = "dbInsert"
+name = "pythonDbInsert"
+function = "pythonDbInsert"
 inputs = ["modelA", "modelB"]
-timeout = 5000
+timeout = 10000

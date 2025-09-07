@@ -35,3 +35,8 @@ addopts = "-v"
 pythonpath = [
     "."
 ]
+
+[tool.uv.workspace]
+members = [
+    "scripts/pythonDbInsert",
+]
