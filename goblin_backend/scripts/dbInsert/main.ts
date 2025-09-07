@@ -3,8 +3,9 @@ import { Database } from "@db/sqlite";
 // Input format based on the provided example
 interface ModelOutput {
   id: string;
-  timestamp: string;
-  comment: string;
+  timestamp?: string;
+  comment?: string;
+  label?: string | number;
 }
 
 interface InputData {
@@ -32,7 +33,7 @@ function initializeDatabase(db: Database) {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
       original_id TEXT,
-      text TEXT,
+      comment TEXT,
       label REAL,
       model TEXT,
       model_is_hate_speech BOOLEAN,
@@ -64,7 +65,7 @@ function insertResult(db: Database, data: InputData): number {
   const stmt = db.prepare(`
     INSERT INTO hate_speech_results (
       original_id,
-      text,
+      comment,
       label,
       model,
       model_is_hate_speech,
@@ -74,14 +75,20 @@ function insertResult(db: Database, data: InputData): number {
   
   try {
     // Insert result only if success is true
-    if (data.success && data.output) {
+    if (data.output) {
+      // Convert label to number if it's a string
+      let labelValue = null;
+      if (data.output.label !== undefined && data.output.label !== null) {
+        labelValue = typeof data.output.label === 'string' ? parseFloat(data.output.label) : data.output.label;
+      }
+      
       stmt.run(
         data.output.id || null,
         data.output.comment || null,
-        null, // No label in the provided format
+        labelValue,
         data.model || "unknown",
         data.is_hate_speech ? 1 : 0,
-        data.output.timestamp || null
+        data.output.timestamp || Date().toString()
       );
       insertedCount++;
     }
@@ -123,8 +130,8 @@ export async function processJsonArray(jsonInputs: string[]): Promise<OutputResp
             throw new Error("Missing or invalid 'is_hate_speech' field");
           }
           
-          if (!data.output || !data.output.id || !data.output.comment) {
-            throw new Error("Missing or invalid 'output' field with required 'id' and 'comment'");
+          if (!data.output || !data.output.id || (!data.output.comment && !data.output.text)) {
+            throw new Error("Missing or invalid 'output' field with required 'id' and 'comment' or 'text'");
           }
           
           // Insert the result

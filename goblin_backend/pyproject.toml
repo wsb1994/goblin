@@ -17,6 +17,10 @@ dependencies = [
 requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
+[tool.setuptools.packages.find]
+include = ["engine*"]
+exclude = ["plans*", "scripts*"]
+
 [dependency-groups]
 dev = [
     "pytest>=8.4.2",

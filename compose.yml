@@ -27,14 +27,12 @@ services:
     container_name: goblin-backend
     environment:
       - AMQP_URL=amqp://admin:admin@rabbitmq:5672/
-      - AMQP_QUEUE=test_queue
+      - AMQP_QUEUE=goblin
     ports:
       - "8001:8001"
     depends_on:
       rabbitmq:
         condition: service_healthy
-    volumes:
-      - ./goblin_backend:/app
     networks:
       - goblin-network
     restart: unless-stopped

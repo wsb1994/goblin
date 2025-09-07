@@ -18,7 +18,6 @@ function standardOutput(output: string) {
 
 interface InputData {
   id?: string;
-  text?: string;
   label?: number;
   comment?: string;
   [key: string]: any;

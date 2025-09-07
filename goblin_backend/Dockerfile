@@ -1,28 +1,30 @@
 FROM python:3.13-slim
 
-# Set working directory
 WORKDIR /app
+COPY . /app/src
 
-# Install system dependencies
+# Install system dependencies + Deno
 RUN apt-get update && apt-get install -y \
     curl \
+    unzip \
+    && curl -fsSL https://deno.land/install.sh | sh \
+    && mv /root/.deno/bin/deno /usr/local/bin/deno \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy project files
-COPY pyproject.toml ./
-COPY uv.lock ./
+# Copy project files for dependency install
+COPY pyproject.toml uv.lock ./
 
-# Install uv for faster Python package management
-RUN pip install uv
+# Install uv
+RUN pip install --no-cache-dir uv \
+    && which uv && uv --version
 
 # Install dependencies
 RUN uv sync --frozen
 
-# Copy application code
+# Copy the rest of the code
 COPY . .
 
-# Expose port
-EXPOSE 8000
+EXPOSE 8001
 
-# Command to run the application
-CMD ["uv", "run", "python", "main.py"]
+# Run the app
+CMD ["uv", "run", "main.py"]
