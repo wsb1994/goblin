@@ -1,0 +1,20 @@
+{
+    "python.testing.pytestArgs": [
+        "goblin_backend"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true,
+    "python.testing.cwd": "${workspaceFolder}",
+    "deno.enable": true,
+    "python-envs.pythonProjects": [],
+    "python.defaultInterpreterPath": "goblin_backend/.venv/bin/python",
+    "python.terminal.activateEnvironment": true,
+    "python.venvPath": "${workspaceFolder}/goblin_backend/.venv",
+    "python.envManager": "uv",
+    "python.analysis.extraPaths": [
+        "${workspaceFolder}",
+        "${workspaceFolder}/goblin_backend"
+    ],
+    "python.terminal.activateEnvInCurrentTerminal": true,
+    "python.pythonPath": "goblin_backend/.venv/bin/python"
+}

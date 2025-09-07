@@ -1,0 +1,29 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/goblin_backend",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/goblin_backend"
+            },
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "name": "Python: Test Engine Example",
+            "type": "python",
+            "request": "launch",
+            "module": "engine.test_engine_example",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/goblin_backend",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/goblin_backend"
+            },
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}

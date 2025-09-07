@@ -1,5 +1,5 @@
 import json
-from goblin_backend.engine.engine import Engine
+from goblin_backend.engine import Engine
 from goblin_backend.engine.script import Plan
 
 

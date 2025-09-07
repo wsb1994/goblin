@@ -4,7 +4,7 @@ from typing import Dict, List, Any
 import subprocess
 import time
 from threading import Lock
-from engine.script import Script, Plan
+from .script import Script, Plan
 
 
 
